@@ -7,10 +7,12 @@ import time
 import threading
 import re
 from flask import Flask, request, jsonify, Response
+from flask_cors import CORS
 from email_scraper import scrape_multiple
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=None)
+CORS(app)
 
 jobs = {}
 job_queues = {}
