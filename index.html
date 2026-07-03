@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SCRAPER_OS_V1.0 | DASHBOARD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+body { font-family: 'JetBrains Mono', monospace; background: #0c1609; color: #d9e7d0; margin: 0; overflow-x: hidden; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #141e10; }
+::-webkit-scrollbar-thumb { background: #84967c; border: 1px solid #0c1609; }
+::-webkit-scrollbar-thumb:hover { background: #00ff00; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.cursor-blink { animation: blink 1s step-end infinite; }
+.crt-overlay { pointer-events:none; position:fixed; inset:0; background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.1) 50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03)); background-size:100% 3px,3px 100%; z-index:100; opacity:0.2; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.pulse { animation:pulse 1.4s ease-in-out infinite; }
+.screen { display:none; }
+.screen.active { display:flex; flex-direction:column; }
+.grid-bg { background-image:linear-gradient(#182214 1px, transparent 1px),linear-gradient(90deg,#182214 1px,transparent 1px); background-size:20px 20px; }
+.dot-bg { background-image:radial-gradient(circle,#2d3828 1px,transparent 1px); background-size:24px 24px; }
+.ascii-border { position:relative; border:2px solid #84967c; }
+.ascii-header { position:absolute; top:-14px; left:12px; background:#0c1609; padding:0 8px; color:#00ff00; font-weight:800; font-size:20px; line-height:28px; z-index:10; }
+.fade-in { animation:fadeSlide .2s ease-out; }
+@keyframes fadeSlide { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
+.col-card { cursor:pointer; border:1px solid #3b4b35; background:#141e10; transition:all .12s; }
+.col-card:hover, .col-card.selected { border-color:#00ff00 !important; background:rgba(0,255,0,.08) !important; }
+tr.invert-flash { filter:invert(1); }
+.btn-primary { border:2px solid #00ff00; background:#00ff00; color:#027100; font-weight:700; cursor:pointer; transition:all .12s; }
+.btn-primary:hover { background:#77ff61; border-color:#77ff61; }
+.btn-primary:active { filter:invert(1); }
+.btn-primary:disabled { opacity:0.4; cursor:not-allowed; background:#3b4b35; border-color:#3b4b35; color:#84967c; }
+.btn-ghost { border:1px solid #84967c; color:#b9ccaf; font-weight:700; cursor:pointer; transition:all .12s; }
+.btn-ghost:hover { border-color:#eaffde; color:#eaffde; }
+.btn-ghost:active { filter:invert(1); }
+th { position:sticky; top:0; z-index:5; }
+</style>
+<script>
+tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-primary-container":"#027100","on-background":"#d9e7d0","inverse-on-surface":"#283324","on-primary-fixed-variant":"#015300","surface-variant":"#2d3828","on-primary":"#013a00","on-surface-variant":"#b9ccaf","secondary":"#aeecff","surface":"#0c1609","surface-container-high":"#222d1e","tertiary-fixed-dim":"#e8bdb4","outline":"#84967c","on-secondary-fixed-variant":"#004e5d","on-primary-fixed":"#002200","on-secondary-container":"#005b6c","primary-fixed":"#77ff61","secondary-fixed-dim":"#00d9ff","error":"#ffb4ab","inverse-surface":"#d9e7d0","surface-tint":"#02e600","inverse-primary":"#026e00","surface-container-lowest":"#071105","surface-container-low":"#141e10","on-surface":"#d9e7d0","background":"#0c1609","primary":"#eaffde","primary-container":"#00ff00","surface-container":"#182214","on-tertiary-fixed":"#2d1510","secondary-fixed":"#aeecff","surface-dim":"#0c1609","on-tertiary-container":"#7a5851","on-error-container":"#ffdad6","secondary-container":"#00d9ff","tertiary":"#fff7f5","surface-bright":"#313c2c","error-container":"#93000a","on-tertiary":"#452924","tertiary-fixed":"#ffdad3","tertiary-container":"#ffd2c9","on-secondary-fixed":"#001f26","primary-fixed-dim":"#02e600","on-tertiary-fixed-variant":"#5e3f39","outline-variant":"#3b4b35","surface-container-highest":"#2d3828","on-secondary":"#003641","on-error":"#690005"},fontFamily:{mono:["JetBrains Mono"]},borderRadius:{DEFAULT:"0px",lg:"0px",xl:"0px"},spacing:{gutter:"16px","margin-sm":"16px","margin-md":"32px"},fontSize:{"headline-md":["20px",{lineHeight:"28px",fontWeight:"700"}],"label-md":["14px",{lineHeight:"16px",fontWeight:"700"}],"body-sm":["14px",{lineHeight:"20px",fontWeight:"400"}],"headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",fontWeight:"400"}],"code-snippet":["14px",{lineHeight:"20px",fontWeight:"400"}]}}}}
+</script>
+</head>
+<body class="bg-background text-on-background">
+<div class="crt-overlay"></div>
+
+<!-- ═══ TOP APP BAR ═══ -->
+<header class="fixed top-0 left-0 right-0 h-12 bg-surface border-b-2 border-outline z-50 flex justify-between items-center px-margin-sm">
+  <div class="flex items-center gap-4">
+    <span class="font-headline-lg text-headline-lg text-primary tracking-tighter">SCRAPER_OS_V1.0</span>
+    <div class="h-5 w-px bg-outline"></div>
+    <span class="text-label-md font-label-md text-on-surface-variant" id="page-title">[1] DASHBOARD</span>
+    <span class="px-2 py-0.5 bg-primary-container text-on-primary-container text-label-md font-label-md" id="session-badge">LIVE_SESSION</span>
+  </div>
+  <div class="flex items-center gap-6">
+    <div class="hidden md:flex gap-4">
+      <span class="material-symbols-outlined text-primary cursor-pointer hover:bg-primary-fixed hover:text-on-primary-fixed p-1 transition-colors text-[20px]">terminal</span>
+      <span class="material-symbols-outlined text-primary cursor-pointer hover:bg-primary-fixed hover:text-on-primary-fixed p-1 transition-colors text-[20px]">settings</span>
+      <span class="material-symbols-outlined text-error cursor-pointer hover:bg-error-container p-1 transition-colors text-[20px]">power_settings_new</span>
+    </div>
+    <span class="text-label-md font-label-md text-primary border-l border-outline pl-4 flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-primary-container pulse"></span>
+      <span id="top-status">OPTIMAL</span>
+    </span>
+  </div>
+</header>
+
+<!-- results header uses same bar as main (no search) -->
+
+<!-- ═══ SIDE NAV BAR ═══ -->
+<aside class="fixed left-0 top-12 bottom-0 w-64 bg-surface border-r-2 border-outline flex flex-col z-40 hidden md:flex">
+  <div class="p-4 border-b-2 border-outline bg-surface-container-low">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 border-2 border-primary-fixed-dim flex items-center justify-center bg-primary-container text-on-primary-container font-bold text-sm">R_01</div>
+      <div>
+        <div class="text-label-md font-label-md text-primary">OPERATOR_01</div>
+        <div class="text-[10px] text-on-surface-variant opacity-70">ID: 8829-X</div>
+      </div>
+    </div>
+    <button class="mt-4 w-full border border-primary-fixed-dim text-primary py-1 text-label-md font-label-md hover:bg-primary-fixed-dim hover:text-on-primary transition-all active:invert flex items-center justify-center gap-2" onclick="switchScreen('dashboard')">
+      <span class="material-symbols-outlined text-[16px]">add</span> NEW_TASK
+    </button>
+  </div>
+
+  <nav class="flex-1 py-2 overflow-y-auto">
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-100 group nav-link" data-screen="dashboard" href="#">
+      <span class="material-symbols-outlined text-[18px] group-hover:text-primary">dashboard</span>
+      <span class="text-label-md font-label-md">[1] DASHBOARD</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-100 group nav-link" data-screen="active" href="#">
+      <span class="material-symbols-outlined text-[18px] group-hover:text-primary">memory</span>
+      <span class="text-label-md font-label-md">[2] ACTIVE_JOBS</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-100 group nav-link" data-screen="config" href="#">
+      <span class="material-symbols-outlined text-[18px] group-hover:text-primary">settings_ethernet</span>
+      <span class="text-label-md font-label-md">[3] CONFIG_ENV</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-variant transition-all duration-100 group nav-link" data-screen="results" href="#">
+      <span class="material-symbols-outlined text-[18px] group-hover:text-primary">database</span>
+      <span class="text-label-md font-label-md">[4] SCRAPE_DB</span>
+    </a>
+  </nav>
+
+  <div class="mt-auto border-t-2 border-outline p-2"></div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════════════════ -->
+<!-- MAIN CONTENT                                                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════════════════════════ -->
+<main class="md:ml-64 pt-12 min-h-screen flex flex-col" id="main-content">
+
+<!-- ═══ SCREEN 1: DASHBOARD ═══ -->
+<section class="screen active flex-1 grid-bg" id="screen-dashboard">
+  <div class="p-gutter grid grid-cols-12 gap-gutter flex-1">
+
+    <!-- TARGET_URLS -->
+    <section class="col-span-12 lg:col-span-8 ascii-border p-margin-sm bg-surface-container-low">
+      <div class="ascii-header">┌── TARGET_URLS ──────┐</div>
+      <div class="mt-2">
+        <div class="flex items-center gap-2 text-primary font-code-snippet mb-2">
+          <span class="material-symbols-outlined text-[18px]">link</span>
+          <span class="text-code-snippet">INPUT_LIST_STR (NEWLINE_DELIMITED)</span>
+        </div>
+        <div class="relative">
+          <textarea class="w-full h-40 bg-surface-container-lowest border border-outline p-4 font-code-snippet text-primary focus:outline-none focus:border-primary-container resize-none placeholder:text-on-surface-variant/30 font-mono" id="url-textarea" placeholder="https://target-domain-alpha.net/api/v1&#10;https://secure-node-09.io/crawler&#10;https://vault.sys/data/export"></textarea>
+          <div class="absolute bottom-4 left-4 flex items-center text-primary-container font-code-snippet pointer-events-none">
+            <span>&gt;</span><span class="ml-1 cursor-blink">█</span>
+          </div>
+        </div>
+        <div class="flex justify-end gap-4 mt-4">
+          <button class="btn-ghost px-4 py-1 font-label-md text-label-md" onclick="document.getElementById('url-textarea').value='';clearFile()">CLEAR_BUFFER</button>
+          <button class="btn-primary px-6 py-1 font-label-md text-label-md flex items-center gap-2" id="init-scrape-btn" onclick="initScrapeFromTextarea()">
+            <span class="material-symbols-outlined text-[18px]">play_arrow</span> INITIALIZE_SCRAPE
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SYSTEM_STATUS -->
+    <section class="col-span-12 lg:col-span-4 ascii-border p-margin-sm bg-surface-container-low">
+      <div class="ascii-header">┌── SYSTEM_STATUS ──┐</div>
+      <div class="flex flex-col gap-6 mt-4">
+        <div class="space-y-2">
+          <div class="flex justify-between text-label-md font-label-md">
+            <span class="text-on-surface-variant">THREAD_USAGE</span>
+            <span class="text-primary-container" id="sys-threads">0/0</span>
+          </div>
+          <div class="font-code-snippet text-code-snippet text-primary-container tracking-wider" id="sys-threads-bar">[░░░░░░░░░░░░░░░░░░░░] 0%</div>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between text-label-md font-label-md">
+            <span class="text-on-surface-variant">EMAIL_BUFFER</span>
+            <span class="text-secondary-fixed-dim" id="sys-emails">0</span>
+          </div>
+          <div class="font-code-snippet text-code-snippet text-secondary-fixed-dim tracking-wider" id="sys-emails-bar">[░░░░░░░░░░░░░░░░░░░░] 0</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-label-md font-label-md">
+          <div class="border border-outline p-2">
+            <span class="text-on-surface-variant block text-[10px]">JOBS_RUN</span>
+            <span class="text-primary" id="stat-jobs">0</span>
+          </div>
+          <div class="border border-outline p-2">
+            <span class="text-on-surface-variant block text-[10px]">ERR_RATE</span>
+            <span class="text-error" id="stat-err-rate">0%</span>
+          </div>
+          <div class="border border-outline p-2">
+            <span class="text-on-surface-variant block text-[10px]">FOUND</span>
+            <span class="text-primary-fixed" id="stat-total-found">0</span>
+          </div>
+          <div class="border border-outline p-2">
+            <span class="text-on-surface-variant block text-[10px]">PHONES</span>
+            <span class="text-secondary-fixed-dim" id="stat-phones">0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILE_UPLOAD -->
+    <section class="col-span-12 ascii-border p-margin-sm bg-surface-container-low">
+      <div class="ascii-header">┌── FILE_UPLOAD ──────┐</div>
+      <div class="border-2 border-dashed border-outline mt-4 h-28 flex flex-col items-center justify-center cursor-pointer hover:bg-surface-variant transition-colors group" id="drop-zone" onclick="document.getElementById('csv-input').click()">
+        <span class="material-symbols-outlined text-outline group-hover:text-primary-container scale-150 mb-1">upload_file</span>
+        <p class="text-label-md font-label-md text-on-surface-variant group-hover:text-primary">DRAG & DROP CONFIGURATION_FILES OR <span class="text-primary underline">BROWSE_LOCAL</span></p>
+        <p class="text-body-sm font-body-sm text-on-surface-variant/50 mt-0.5" id="file-label">SUPPORTED: .CSV (MAX 50MB)</p>
+        <input id="csv-input" type="file" accept=".csv,.txt" class="hidden"/>
+      </div>
+      <!-- Column picker revealed after CSV parse -->
+      <div class="mt-4" id="col-section" style="display:none">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-primary-fixed font-bold text-[13px]">SELECT_URL_COLUMN</span>
+              <span class="text-code-snippet text-on-surface-variant" id="row-count"></span>
+            </div>
+            <p class="text-body-sm text-on-surface-variant" id="col-hint">Click the column that contains website URLs</p>
+          </div>
+        </div>
+        <div id="col-cards" class="flex flex-wrap gap-2 mb-3"></div>
+        <div class="overflow-x-auto border border-outline max-h-48 overflow-y-auto">
+          <table class="w-full text-left font-code-snippet text-code-snippet border-collapse">
+            <thead>
+              <tr class="bg-surface-container-high text-primary border-b-2 border-outline" id="preview-thead"></tr>
+            </thead>
+            <tbody id="preview-tbody" class="divide-y divide-outline-variant/30"></tbody>
+          </table>
+        </div>
+        <div class="flex justify-end gap-3 mt-3">
+          <button class="btn-ghost px-4 py-1 text-label-md font-label-md" onclick="clearFile()">CLEAR</button>
+          <button class="btn-primary px-5 py-1 text-label-md font-label-md flex items-center gap-2" id="start-btn" onclick="startScrapeFromCSV()">
+            <span class="material-symbols-outlined text-[18px]">play_arrow</span> INITIALIZE_SCRAPE
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECENT_JOBS -->
+    <section class="col-span-12 ascii-border p-margin-sm bg-surface-container-low">
+      <div class="ascii-header">┌── RECENT_JOBS ──────┐</div>
+      <div class="mt-4 overflow-x-auto">
+        <table class="w-full border-collapse font-code-snippet text-code-snippet" id="jobs-table">
+          <thead>
+            <tr class="bg-surface-container-high text-primary border-b-2 border-outline">
+              <th class="text-left p-2 border-r border-outline">JOB_ID</th>
+              <th class="text-left p-2 border-r border-outline">TIMESTAMP</th>
+              <th class="text-left p-2 border-r border-outline">TARGET_RESOURCES</th>
+              <th class="text-left p-2 border-r border-outline">STATUS</th>
+              <th class="text-right p-2">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="jobs-tbody" class="text-on-surface-variant">
+            <tr><td colspan="5" class="p-4 text-center text-on-surface-variant/50">[ NO_JOBS_REGISTERED ]</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-4 flex items-center justify-between text-label-md font-label-md text-on-surface-variant">
+        <span id="jobs-count">SHOWING 0 JOBS</span>
+        <div class="flex gap-4">
+          <button class="hover:text-primary flex items-center gap-1" onclick="refreshJobs()"><span class="material-symbols-outlined text-[16px]">refresh</span> REFRESH</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- ═══ SCREEN 2: ACTIVE_JOBS ═══ -->
+<section class="screen flex-1 flex flex-col p-gutter gap-4 bg-surface" id="screen-active" style="height:calc(100vh - 56px)">
+  <!-- TASK PROGRESS BANNER -->
+  <section class="border-2 border-primary bg-surface p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="flex flex-col">
+      <span class="text-headline-md font-headline-md text-primary" id="job-title-banner">TASK_PROG: [░░░░░░░░░░░░░░░░░░░░] 0%</span>
+      <span class="text-label-md font-label-md text-on-surface-variant" id="job-url-banner">TARGET_URL: N/A</span>
+    </div>
+    <div class="flex gap-4">
+      <div class="border border-outline px-3 py-1 flex flex-col items-center">
+        <span class="text-[10px] text-on-surface-variant">THREADS</span>
+        <span class="font-bold text-primary" id="banner-threads">0 / 0</span>
+      </div>
+      <div class="border border-outline px-3 py-1 flex flex-col items-center">
+        <span class="text-[10px] text-on-surface-variant">UPTIME</span>
+        <span class="font-bold text-primary" id="banner-uptime">00:00:00</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-0">
+    <!-- LOG_STREAM -->
+    <section class="lg:col-span-8 flex flex-col border border-outline bg-surface min-h-0">
+      <div class="bg-surface-variant px-3 py-1 flex justify-between items-center border-b border-outline">
+        <span class="text-label-md font-label-md text-on-surface-variant">┌── LOG_STREAM ──────┐</span>
+        <span class="text-label-md font-label-md text-primary" id="log-status-label">STATUS: STANDBY</span>
+      </div>
+      <div class="flex-1 overflow-y-auto p-3 font-code-snippet text-code-snippet space-y-1 bg-surface-container-lowest leading-relaxed" id="log-box">
+        <div class="text-on-surface-variant">[<span class="text-primary-fixed">*</span>] SCRAPER_OS_V1.0 INITIALIZED</div>
+        <div class="text-on-surface-variant">[<span class="text-primary-fixed">*</span>] AWAITING TASK_ASSIGNMENT...</div>
+        <div class="flex items-center gap-1 mt-2">
+          <span class="text-primary-fixed">SCRAPER@LOCAL:~$</span>
+          <span class="w-2 h-4 bg-primary-fixed cursor-blink"></span>
+        </div>
+      </div>
+      <div class="bg-surface-variant px-3 py-1 border-t border-outline flex justify-between items-center">
+        <button onclick="document.getElementById('log-box').innerHTML=defaultLogHtml()" class="text-[10px] text-on-surface-variant hover:text-primary transition-colors">CLEAR</button>
+        <span class="text-[10px] text-on-surface-variant" id="log-line-count">LINES: 0</span>
+      </div>
+    </section>
+
+    <!-- EXTRACTION_STATS -->
+    <section class="lg:col-span-4 flex flex-col border border-outline bg-surface min-h-0">
+      <div class="bg-surface-variant px-3 py-1 border-b border-outline">
+        <span class="text-label-md font-label-md text-on-surface-variant">┌── EXTRACTION_STATS ──┐</span>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-6">
+        <div class="space-y-2">
+          <div class="flex justify-between text-label-md font-label-md">
+            <span class="text-on-surface-variant">EMAILS_FOUND</span>
+            <span class="text-primary-fixed" id="live-email-count">0</span>
+          </div>
+          <div class="h-4 bg-surface-container-high border border-outline-variant">
+            <div class="h-full bg-secondary-fixed-dim" id="email-progress-bar" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="border border-outline-variant p-2">
+            <div class="text-[10px] text-on-surface-variant">PROGRESS</div>
+            <div class="text-xl font-bold text-primary-fixed" id="live-progress">0%</div>
+          </div>
+          <div class="border border-outline-variant p-2">
+            <div class="text-[10px] text-on-surface-variant">ERRORS</div>
+            <div class="text-xl font-bold text-error" id="live-errors">0</div>
+          </div>
+          <div class="border border-outline-variant p-2">
+            <div class="text-[10px] text-on-surface-variant">PROCESSED</div>
+            <div class="text-xl font-bold text-primary" id="live-processed">0</div>
+          </div>
+          <div class="border border-outline-variant p-2">
+            <div class="text-[10px] text-on-surface-variant">PHONES</div>
+            <div class="text-xl font-bold text-secondary-fixed-dim" id="live-phones">0</div>
+          </div>
+        </div>
+        <div class="border border-outline p-2 bg-surface-container-low">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-label-md font-label-md text-on-surface-variant">ENTITY_DISTRIBUTION</span>
+            <span class="material-symbols-outlined text-sm">bar_chart</span>
+          </div>
+          <div class="space-y-1 font-code-snippet text-[12px]">
+            <div class="flex justify-between"><span>[ EMAIL ]</span><span class="text-primary-fixed" id="dist-emails">0</span></div>
+            <div class="flex justify-between"><span>[ PHONE ]</span><span class="text-secondary-fixed-dim" id="dist-phones">0</span></div>
+            <div class="flex justify-between"><span>[ PAGES ]</span><span class="text-primary" id="dist-pages">0</span></div>
+            <div class="flex justify-between"><span>[ SUCCESS ]</span><span class="text-primary-fixed" id="dist-success">0</span></div>
+          </div>
+        </div>
+        <div class="relative h-24 border border-outline-variant overflow-hidden bg-surface-container-lowest flex items-center justify-center">
+          <div class="bg-surface px-2 border border-primary text-[10px] text-primary-fixed" id="traffic-status">DATA_TRAFFIC: STANDBY</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- FOOTER SHORTCUTS -->
+  <footer class="border-t-2 border-outline pt-4 flex flex-wrap justify-between items-center gap-4 text-label-md font-label-md">
+    <div class="flex gap-4">
+      <div class="flex items-center gap-2 group cursor-pointer" onclick="terminateJob()">
+        <span class="bg-error-container text-error px-2 border border-error text-[11px]">[T]</span>
+        <span class="text-on-surface-variant group-hover:text-error transition-colors">TERMINATE</span>
+      </div>
+      <div class="flex items-center gap-2 group cursor-pointer" onclick="switchScreen('dashboard')">
+        <span class="bg-surface-variant text-on-surface-variant px-2 border border-outline text-[11px]">[B]</span>
+        <span class="text-on-surface-variant group-hover:text-primary transition-colors">BACK</span>
+      </div>
+    </div>
+    <div class="text-on-surface-variant">
+      OS_TIME: <span id="clock">00:00:00</span> | JOB: <span id="footer-job-id">—</span>
+    </div>
+  </footer>
+</section>
+
+<!-- ═══ SCREEN 3: CONFIG_ENV ═══ -->
+<section class="screen flex-1 grid-bg" id="screen-config">
+  <div class="p-gutter grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <section class="ascii-border p-margin-sm bg-surface-container-low">
+      <div class="ascii-header">┌── NETWORK_CONFIG ──┐</div>
+      <div class="mt-3 space-y-6">
+        <div>
+          <div class="flex justify-between text-label-md font-label-md mb-1">
+            <span class="text-on-surface-variant">TIMEOUT (seconds)</span>
+            <span class="text-primary-fixed" id="timeout-val">10</span>
+          </div>
+          <input type="range" min="3" max="30" value="10" id="timeout-range" class="w-full accent-primary-container" oninput="document.getElementById('timeout-val').textContent=this.value">
+          <p class="text-[10px] text-on-surface-variant mt-1">Request timeout per page</p>
+        </div>
+        <div>
+          <div class="flex justify-between text-label-md font-label-md mb-1">
+            <span class="text-on-surface-variant">CONCURRENT_WORKERS</span>
+            <span class="text-primary-fixed" id="workers-val2">5</span>
+          </div>
+          <input type="range" min="1" max="200" value="5" id="max-workers2" class="w-full accent-primary-container" oninput="document.getElementById('workers-val2').textContent=this.value;updateSettings()">
+          <p class="text-[10px] text-on-surface-variant mt-1">URLs to scrape simultaneously</p>
+        </div>
+        <div>
+          <div class="flex justify-between text-label-md font-label-md mb-1">
+            <span class="text-on-surface-variant">CRAWL_DEPTH</span>
+            <span class="text-primary-fixed" id="depth-val2">0</span>
+          </div>
+          <input type="range" min="0" max="3" value="0" id="crawl-depth2" class="w-full accent-primary-container" oninput="document.getElementById('depth-val2').textContent=this.value;updateSettings()">
+          <p class="text-[10px] text-on-surface-variant mt-1">Same-domain link follow depth</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <input type="checkbox" id="skip-phones" class="accent-primary-container w-4 h-4">
+          <label for="skip-phones" class="text-label-md font-label-md text-on-surface-variant">SKIP_PHONE_EXTRACTION</label>
+        </div>
+      </div>
+    </section>
+    <section class="ascii-border p-margin-sm bg-surface-container-low">
+      <div class="ascii-header">┌── SYSTEM_INFO ─────┐</div>
+      <div class="mt-3 font-code-snippet text-code-snippet space-y-2 text-on-surface-variant leading-relaxed">
+        <div>SCRAPER_OS VERSION: 1.0.0</div>
+        <div>ENGINE: MULTI_THREADED (REQUESTS + BS4)</div>
+        <div>PARSER: HTML.PARSER</div>
+        <div>SESSION: PERSISTENT_CONNECTION_POOL</div>
+        <div class="mt-2 text-primary-fixed">ALL PARAMETERS APPLIED AT SCRAPE_INIT</div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- ═══ SCREEN 5: SCRAPE_DB ═══ -->
+<section class="screen flex-1 dot-bg" id="screen-results">
+  <div class="p-margin-sm grid grid-cols-12 gap-gutter" style="min-height:calc(100vh - 56px)">
+    <!-- DATABASE_LOG -->
+    <div class="col-span-12 lg:col-span-8 flex flex-col border border-outline bg-surface-container-lowest overflow-hidden" style="max-height:calc(100vh - 80px)">
+      <div class="bg-surface-variant px-4 py-2 flex justify-between items-center border-b border-outline">
+        <span class="text-headline-md font-headline-md text-primary flex items-center gap-2">┌── DATABASE_LOG ──────┐</span>
+        <div class="flex items-center gap-4 text-label-md font-label-md">
+          <span class="text-secondary-fixed-dim" id="db-total-records">TOTAL_RECORDS: 0</span>
+          <span class="text-on-surface-variant" id="db-upload-status"></span>
+        </div>
+      </div>
+      <div class="flex-1 overflow-auto">
+        <table class="w-full border-collapse font-code-snippet text-code-snippet" id="db-table">
+          <thead>
+            <tr class="bg-surface-container border-b border-outline sticky top-0">
+              <th class="p-3 text-left font-label-md text-label-md text-outline">JOB_ID</th>
+              <th class="p-3 text-left font-label-md text-label-md text-outline">TARGET_DOMAIN</th>
+              <th class="p-3 text-left font-label-md text-label-md text-outline">TIMESTAMP</th>
+              <th class="p-3 text-left font-label-md text-label-md text-outline">EXTRACTED</th>
+              <th class="p-3 text-left font-label-md text-label-md text-outline">STATUS</th>
+            </tr>
+          </thead>
+          <tbody id="db-tbody" class="divide-y divide-outline-variant/30"></tbody>
+        </table>
+      </div>
+      <div class="p-3 bg-surface-container border-t border-outline flex items-center gap-2">
+        <span class="text-primary font-bold text-[14px]">></span>
+        <span class="text-primary-fixed-dim">SCRAPE_DB_QUERY</span>
+        <span class="mx-2 text-outline">|</span>
+        <span class="text-on-surface cursor-blink text-[14px]">_</span>
+        <div class="ml-auto flex gap-4 text-[10px] text-on-surface-variant font-bold">
+          <span>F2: FILTER</span>
+          <span>F5: REFRESH</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATA_PREVIEW + EXPORT + TELEMETRY -->
+    <div class="col-span-12 lg:col-span-4 flex flex-col gap-gutter">
+      <!-- DATA_PREVIEW -->
+      <div class="flex-1 border border-outline bg-surface-container-low flex flex-col overflow-hidden">
+        <div class="bg-secondary-container text-on-secondary-container px-4 py-2 text-headline-md font-headline-md flex items-center justify-between">
+          <span>DATA_PREVIEW</span>
+          <span class="material-symbols-outlined text-[18px]">description</span>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 font-code-snippet text-code-snippet text-secondary-fixed-dim bg-black/40" id="preview-box">
+          <div class="mb-2 text-outline opacity-50 font-bold">// RAW_TEXT_OUTPUT [WAITING]</div>
+          <div class="text-on-surface-variant italic">[ NO_RESULTS_YET ]</div>
+        </div>
+      </div>
+
+      <!-- EXPORT BUTTONS -->
+      <div class="grid grid-cols-1 gap-3">
+        <button id="dl-unique" class="group relative overflow-hidden bg-surface border-2 border-primary-fixed-dim p-4 text-left transition-all hover:bg-primary-fixed hover:text-on-primary-fixed active:invert">
+          <div class="flex justify-between items-center relative z-10">
+            <span class="text-headline-md font-headline-md">EXPORT_CSV_UNIQUE</span>
+            <span class="material-symbols-outlined text-3xl">filter_alt</span>
+          </div>
+          <div class="mt-1 text-sm opacity-70 relative z-10">DEDUPLICATED EMAILS ONLY</div>
+          <div class="absolute right-0 bottom-0 text-6xl opacity-10 pointer-events-none font-bold translate-x-4 translate-y-4">UNQ</div>
+        </button>
+        <button id="dl-summary" class="group relative overflow-hidden bg-surface border-2 border-secondary-fixed-dim p-4 text-left transition-all hover:bg-secondary-fixed-dim hover:text-on-secondary-fixed active:invert">
+          <div class="flex justify-between items-center relative z-10">
+            <span class="text-headline-md font-headline-md">EXPORT_CSV_ALL</span>
+            <span class="material-symbols-outlined text-3xl">download</span>
+          </div>
+          <div class="mt-1 text-sm opacity-70 relative z-10">EMAILS WITH SOURCE URLS</div>
+          <div class="absolute right-0 bottom-0 text-6xl opacity-10 pointer-events-none font-bold translate-x-4 translate-y-4">CSV</div>
+        </button>
+        <div class="grid grid-cols-2 gap-3">
+          <button id="dl-phones" class="group relative overflow-hidden bg-surface border-2 border-outline p-3 text-left transition-all hover:border-primary hover:text-primary active:invert">
+            <span class="text-label-md font-label-md flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">call</span> PHONES</span>
+          </button>
+          <button id="dl-json" class="group relative overflow-hidden bg-surface border-2 border-outline p-3 text-left transition-all hover:border-primary hover:text-primary active:invert">
+            <span class="text-label-md font-label-md flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">data_object</span> JSON</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SYS_TELEMETRY -->
+      <div class="border border-outline p-3 bg-surface-container-high">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-[10px] font-bold text-outline">SYS_TELEMETRY</span>
+          <div class="flex gap-1">
+            <div class="w-1 h-1 bg-primary pulse"></div>
+            <div class="w-1 h-1 bg-primary pulse" style="animation-delay:0.2s"></div>
+            <div class="w-1 h-1 bg-primary pulse" style="animation-delay:0.4s"></div>
+          </div>
+        </div>
+        <div class="space-y-1 font-code-snippet text-[11px]">
+          <div class="flex justify-between"><span class="text-on-surface-variant">JOBS:</span><span class="text-primary-fixed" id="tel-jobs">0</span></div>
+          <div class="flex justify-between"><span class="text-on-surface-variant">EMAILS:</span><span class="text-primary-fixed" id="tel-emails">0</span></div>
+          <div class="flex justify-between"><span class="text-on-surface-variant">PHONES:</span><span class="text-secondary-fixed-dim" id="tel-phones">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══ RESULTS FOOTER STATUS BAR ═══ -->
+<footer class="fixed bottom-0 left-0 right-0 h-6 bg-surface-container border-t-2 border-outline z-50 hidden items-center px-4 justify-between text-label-md text-[10px]" id="results-footer">
+  <div class="flex gap-6">
+    <span class="text-primary flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#00ff00]"></span> LINK_STABLE: 1.2GBPS</span>
+    <span class="text-on-surface-variant">PROXY_ROTATION: ON [88 Proxies]</span>
+    <span class="text-on-surface-variant">THROTTLE: 50 req/sec</span>
+  </div>
+  <div class="flex gap-4 items-center">
+    <span class="text-secondary-fixed-dim uppercase" id="footer-storage">LOCAL_STORAGE: 0% FULL</span>
+    <span class="text-on-surface bg-outline px-2 py-0.5">UTF-8</span>
+    <span class="text-primary-fixed-dim" id="sys-clock">12:00:00</span>
+  </div>
+</footer>
+
+<!-- ═══ BACKGROUND DECORATIVE ELEMENTS ═══ -->
+<div class="fixed top-0 left-0 w-full h-full pointer-events-none opacity-5 overflow-hidden -z-10">
+  <div class="absolute top-1/4 -right-20 w-96 h-96 border-[20px] border-primary rotate-45"></div>
+  <div class="absolute bottom-1/4 -left-20 w-64 h-64 border-[10px] border-secondary rotate-12"></div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden px-4 py-2 border border-outline bg-surface text-primary font-mono text-[12px] shadow-2xl"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT                                                                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════════════════════ -->
+<script>
+// ═══ STATE ═══
+let currentJobId   = null;
+let selectedColIdx = null;
+let csvFile        = null;
+let csvHeaders     = [];
+let eventSource    = null;
+let sessionJobs    = 0;
+let sessionEmails  = 0;
+let sessionPhones  = 0;
+let completedData  = {};
+let crawlDepth = 0;
+let maxWorkers = 5;
+let errorCount = 0;
+let mProcessed = 0;
+let mSuccess = 0;
+let jobStartTime = null;
+let jobTimerInterval = null;
+let logLineCount = 0;
+
+// ═══ NAVIGATION ═══
+const SCREEN_TITLES = { dashboard:'[1] DASHBOARD', active:'[2] ACTIVE_JOBS', config:'[3] CONFIG_ENV', results:'[4] SCRAPE_DB' };
+
+function switchScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('screen-' + name);
+  if (target) target.classList.add('active');
+  const isResults = name === 'results';
+  document.getElementById('results-footer').style.display = isResults ? 'flex' : 'none';
+  document.getElementById('page-title').textContent = SCREEN_TITLES[name] || name;
+  document.getElementById('main-content').classList.remove('pb-6');
+  if (isResults) document.getElementById('main-content').classList.add('pb-6');
+  document.querySelectorAll('.nav-link').forEach(l => {
+    const act = l.dataset.screen === name;
+    l.classList.toggle('bg-primary-container', act);
+    l.classList.toggle('text-on-primary-container', act);
+    l.classList.toggle('font-bold', act);
+    l.classList.toggle('border-l-4', act);
+    l.classList.toggle('border-primary', act);
+    l.classList.toggle('text-on-surface-variant', !act);
+    l.classList.toggle('hover:bg-surface-variant', !act);
+  });
+  if (name === 'results') populateResultsPage();
+  if (name === 'dashboard') refreshJobs();
+}
+
+document.querySelectorAll('.nav-link').forEach(btn => {
+  btn.addEventListener('click', (e) => { e.preventDefault(); switchScreen(btn.dataset.screen); });
+});
+
+// ═══ SETTINGS ═══
+function updateSettings() {
+  crawlDepth = parseInt(document.getElementById('crawl-depth2').value);
+  maxWorkers = parseInt(document.getElementById('max-workers2').value);
+  document.getElementById('depth-val').textContent = crawlDepth;
+  document.getElementById('workers-val').textContent = maxWorkers;
+  document.getElementById('depth-val2').textContent = crawlDepth;
+  document.getElementById('workers-val2').textContent = maxWorkers;
+}
+
+// ═══ CSV UPLOAD ═══
+const dropZone = document.getElementById('drop-zone');
+const csvInput = document.getElementById('csv-input');
+csvInput.addEventListener('change', () => { if (csvInput.files[0]) handleFile(csvInput.files[0]); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#00ff00'; });
+dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '');
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.style.borderColor = ''; if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+
+function clearFile() {
+  csvFile = null; selectedColIdx = null; csvHeaders = [];
+  document.getElementById('csv-input').value = '';
+  document.getElementById('file-label').textContent = 'SUPPORTED: .CSV (MAX 50MB)';
+  document.getElementById('col-section').style.display = 'none';
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('start-btn').innerHTML = '<span class="material-symbols-outlined text-[18px]">play_arrow</span> INITIALIZE_SCRAPE';
+}
+
+function updateSystemBars(cur, total, emails, phones) {
+  const pct = total > 0 ? Math.min(Math.round((cur/total)*100), 100) : 0;
+  const ebar = Math.min(Math.round(emails/20), 20);
+  const tbar = Math.min(Math.round(pct/5), 20);
+  document.getElementById('sys-threads').textContent = `${cur}/${total}`;
+  document.getElementById('sys-threads-bar').textContent = `[${'█'.repeat(tbar)}${'░'.repeat(20-tbar)}] ${pct}%`;
+  document.getElementById('sys-emails').textContent = emails.toLocaleString();
+  document.getElementById('sys-emails-bar').textContent = `[${'█'.repeat(ebar)}${'░'.repeat(20-ebar)}] ${emails}`;
+  const errRate = total > 0 ? Math.round((errorCount/total)*100) : 0;
+  document.getElementById('stat-err-rate').textContent = errRate + '%';
+  document.getElementById('stat-total-found').textContent = (emails+phones).toLocaleString();
+}
+
+async function handleFile(file) {
+  if (!file.name.match(/\.(csv|txt)$/i)) { showToast('REQUIRE .CSV OR .TXT', 'error'); return; }
+  csvFile = file;
+  document.getElementById('file-label').textContent = '✓ SELECTED: ' + file.name + ' (' + formatBytes(file.size) + ')';
+  const fd = new FormData();
+  fd.append('csv_file', file);
+  try {
+    const res = await fetch('/preview-csv', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, 'error'); return; }
+    csvHeaders = data.headers;
+    buildColumnPicker(data.headers, data.preview, data.suggested_column, data.total_rows);
+    document.getElementById('col-section').style.display = 'block';
+    if (data.suggested_column !== null) selectColumn(data.suggested_column, data.headers[data.suggested_column]);
+  } catch (err) { showToast('PARSE_FAIL: ' + err.message, 'error'); }
+}
+
+function buildColumnPicker(headers, preview, suggested, totalRows) {
+  document.getElementById('row-count').textContent = totalRows + ' DATA_ROWS';
+  const cards = document.getElementById('col-cards'); cards.innerHTML = '';
+  headers.forEach((h, i) => {
+    const card = document.createElement('div');
+    card.className = 'col-card border px-3 py-2 relative text-[12px] font-mono';
+    card.dataset.idx = i;
+    card.innerHTML = '<div class="font-bold text-primary">' + escHtml(h) + '</div><div class="text-[10px] text-on-surface-variant">col ' + (i+1) + '</div>';
+    if (i === suggested) { card.classList.add('selected'); }
+    card.addEventListener('click', () => selectColumn(i, h));
+    cards.appendChild(card);
+  });
+  const thead = document.getElementById('preview-thead'); thead.innerHTML = '';
+  const tbody = document.getElementById('preview-tbody'); tbody.innerHTML = '';
+  headers.forEach(h => {
+    const th = document.createElement('th');
+    th.className = 'px-3 py-2 font-mono text-[10px] text-on-surface-variant uppercase border-b border-outline whitespace-nowrap';
+    th.textContent = h; thead.appendChild(th);
+  });
+  preview.forEach(row => {
+    const tr = document.createElement('tr'); tr.className = 'hover:bg-surface-container-high/40 transition-colors';
+    headers.forEach((_, ci) => {
+      const td = document.createElement('td');
+      td.className = 'px-3 py-1.5 text-[11px] text-on-surface/80 truncate max-w-[180px]';
+      td.textContent = row[ci] ?? ''; tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function selectColumn(idx, name) {
+  selectedColIdx = idx;
+  document.querySelectorAll('.col-card').forEach(c => {
+    c.style.borderColor = parseInt(c.dataset.idx) === idx ? '#00ff00' : '#3b4b35';
+  });
+  document.querySelectorAll('#preview-table th, #preview-table td').forEach((el, i) => {
+    if (el.tagName === 'TH') { el.style.color = i === idx ? '#00ff00' : ''; return; }
+    el.style.color = (i % csvHeaders.length) === idx ? '#00ff00' : '';
+  });
+  document.getElementById('col-hint').textContent = 'Column "' + name + '" selected';
+  document.getElementById('start-btn').disabled = false;
+}
+
+// ═══ INIT SCRAPE (textarea) ═══
+async function initScrapeFromTextarea() {
+  const text = document.getElementById('url-textarea').value.trim();
+  if (!text) { showToast('NO_URLS_IN_BUFFER', 'error'); return; }
+  const urls = text.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+  if (urls.length === 0) { showToast('NO_VALID_URLS', 'error'); return; }
+  const btn = document.getElementById('init-scrape-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> INITIALIZING...';
+  await startScrape(urls, btn);
+}
+
+// ═══ INIT SCRAPE (CSV) ═══
+async function startScrapeFromCSV() {
+  if (!csvFile || selectedColIdx === null) return;
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> INITIALIZING...';
+  const fd = new FormData();
+  fd.append('csv_file', csvFile);
+  fd.append('col_index', selectedColIdx);
+  fd.append('max_workers', maxWorkers);
+  fd.append('crawl_depth', crawlDepth);
+  fd.append('timeout', parseInt(document.getElementById('timeout-range')?.value || 10));
+  try {
+    const res = await fetch('/scrape', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, 'error'); btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">play_arrow</span> INITIALIZE_SCRAPE'; return; }
+    onScrapeStarted(data);
+  } catch (err) { showToast('FAIL: ' + err.message, 'error'); btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">play_arrow</span> INITIALIZE_SCRAPE'; }
+}
+
+async function startScrape(urls, btn) {
+  try {
+    const res = await fetch('/scrape', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls: urls, max_workers: maxWorkers, crawl_depth: crawlDepth, timeout: parseInt(document.getElementById('timeout-range')?.value || 10) })
+    });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, 'error'); btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">play_arrow</span> INITIALIZE_SCRAPE'; return; }
+    onScrapeStarted(data);
+  } catch (err) { showToast('FAIL: ' + err.message, 'error'); btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">play_arrow</span> INITIALIZE_SCRAPE'; }
+}
+
+function onScrapeStarted(data) {
+  currentJobId = data.job_id;
+  resetMonitor(data.total);
+  sessionJobs++;
+  document.getElementById('stat-jobs').textContent = sessionJobs;
+  connectSSE(currentJobId);
+  switchScreen('active');
+}
+
+// ═══ MONITOR ═══
+function resetMonitor(total) {
+  errorCount = mProcessed = mSuccess = logLineCount = 0;
+  jobStartTime = Date.now();
+  if (jobTimerInterval) clearInterval(jobTimerInterval);
+  jobTimerInterval = setInterval(updateUptime, 1000);
+  document.getElementById('live-progress').textContent = '0%';
+  document.getElementById('live-email-count').textContent = '0';
+  document.getElementById('live-phones').textContent = '0';
+  document.getElementById('live-processed').textContent = '0';
+  document.getElementById('live-errors').textContent = '0';
+  document.getElementById('email-progress-bar').style.width = '0%';
+  document.getElementById('dist-emails').textContent = '0';
+  document.getElementById('dist-phones').textContent = '0';
+  document.getElementById('dist-pages').textContent = '0';
+  document.getElementById('dist-success').textContent = '0';
+  document.getElementById('job-title-banner').textContent = 'TASK_PROG: [' + '░'.repeat(20) + '] 0%';
+  document.getElementById('job-url-banner').textContent = 'TARGET_URLS: ' + total;
+  document.getElementById('banner-threads').textContent = '0 / ' + maxWorkers;
+  document.getElementById('log-status-label').textContent = 'STATUS: RUNNING';
+  document.getElementById('traffic-status').textContent = 'DATA_TRAFFIC: ACTIVE';
+  document.getElementById('footer-job-id').textContent = currentJobId ? currentJobId.substring(0,8) : '—';
+  updateSystemBars(0, total, 0, 0);
+  document.getElementById('log-box').innerHTML = '<div class="text-on-surface-variant">[<span class="text-primary-fixed">*</span>] TASK_INITIALIZED: ' + total + ' URLS</div><div class="flex items-center gap-1 mt-2"><span class="text-primary-fixed">SCRAPER@LOCAL:~$</span><span class="w-2 h-4 bg-primary-fixed cursor-blink"></span></div>';
+  document.getElementById('log-line-count').textContent = 'LINES: 0';
+}
+
+function updateUptime() {
+  if (!jobStartTime) return;
+  const e = Math.floor((Date.now()-jobStartTime)/1000);
+  const h = String(Math.floor(e/3600)).padStart(2,'0');
+  const m = String(Math.floor((e%3600)/60)).padStart(2,'0');
+  const s = String(e%60).padStart(2,'0');
+  document.getElementById('banner-uptime').textContent = h+':'+m+':'+s;
+}
+
+// ═══ SSE ═══
+function connectSSE(jobId) {
+  if (eventSource) eventSource.close();
+  eventSource = new EventSource('/stream/' + jobId);
+  eventSource.onmessage = e => {
+    try {
+      const data = JSON.parse(e.data);
+      if (data.type === 'progress') onProgress(data);
+      else if (data.type === 'done') onDone(data);
+    } catch(ex) {}
+  };
+  eventSource.onerror = () => { if (eventSource) { eventSource.close(); eventSource = null; } };
+}
+
+function onProgress(data) {
+  const cur = data.current || 0;
+  const total = data.total || 1;
+  const pct = Math.min(Math.round((cur/total)*100), 100);
+  const emails = data.email_count || 0;
+  const phones = data.phone_count || 0;
+  mProcessed = cur;
+  const filled = Math.round(pct/5);
+  document.getElementById('job-title-banner').textContent = 'TASK_PROG: [' + '█'.repeat(filled) + '░'.repeat(20-filled) + '] ' + pct + '%';
+  document.getElementById('live-progress').textContent = pct + '%';
+  document.getElementById('email-progress-bar').style.width = Math.min(emails/100*100, 100) + '%';
+  document.getElementById('live-email-count').textContent = emails.toLocaleString();
+  document.getElementById('live-phones').textContent = phones.toLocaleString();
+  document.getElementById('live-processed').textContent = cur;
+  document.getElementById('banner-threads').textContent = Math.min(cur, maxWorkers) + ' / ' + maxWorkers;
+  document.getElementById('dist-emails').textContent = emails.toLocaleString();
+  document.getElementById('dist-phones').textContent = phones.toLocaleString();
+  document.getElementById('dist-success').textContent = mSuccess;
+  updateSystemBars(cur, total, emails, phones);
+  for (const entry of (data.log || [])) {
+    const t = new Date().toLocaleTimeString('en-GB',{hour12:false});
+    if (entry.status === 'done') {
+      const pc = entry.phone_count||0; const ec = entry.count||0;
+      let label = 'OK';
+      let msg = entry.url + '  (' + ec + ' email' + (ec!==1?'s':'');
+      if (pc) msg += ', ' + pc + ' phone' + (pc!==1?'s':'');
+      msg += ')';
+      if (ec > 0 || pc > 0) { addLog(t, label, msg, 'primary-fixed'); mSuccess++; }
+      else addLog(t, '--', entry.url + '  (no data)', 'on-surface-variant');
+    } else if (entry.status === 'error') {
+      addLog(t, 'ERR', entry.url + '  ' + (entry.error||''), 'error');
+      errorCount++; document.getElementById('live-errors').textContent = errorCount;
+    }
+  }
+}
+
+function onDone(data) {
+  if (jobTimerInterval) { clearInterval(jobTimerInterval); jobTimerInterval = null; }
+  const emails = data.all_emails || [];
+  const phones = data.all_phones || [];
+  completedData[currentJobId] = { all_emails:emails, all_phones:phones, results:data.results||{}, total:data.total };
+  sessionEmails += emails.length;
+  sessionPhones += phones.length;
+  document.getElementById('stat-phones').textContent = sessionPhones.toLocaleString();
+  document.getElementById('job-title-banner').textContent = 'TASK_PROG: [' + '█'.repeat(20) + '] 100%';
+  document.getElementById('live-progress').textContent = '100%';
+  document.getElementById('log-status-label').textContent = 'STATUS: COMPLETE';
+  document.getElementById('traffic-status').textContent = 'DATA_TRAFFIC: COMPLETE';
+  document.getElementById('banner-threads').textContent = '0 / 0';
+  document.getElementById('footer-job-id').textContent = '—';
+  updateSystemBars(data.total, data.total, emails.length, phones.length);
+  const t = new Date().toLocaleTimeString('en-GB',{hour12:false});
+  addLog(t, 'DONE', data.total + ' URLs — ' + emails.length + ' unique emails, ' + phones.length + ' phones', 'secondary-fixed-dim');
+  if (eventSource) { eventSource.close(); eventSource = null; }
+  showToast('COMPLETE: ' + emails.length + ' emails, ' + phones.length + ' phones', 'info');
+}
+
+function addLog(t, level, message, colorClass) {
+  const box = document.getElementById('log-box');
+  const div = document.createElement('div');
+  div.className = 'fade-in text-on-surface-variant';
+  div.innerHTML = '[' + t + '] <span class="text-' + colorClass + '">' + level + ':</span> ' + message;
+  const cursor = box.lastElementChild;
+  if (cursor && cursor.innerHTML.includes('SCRAPER@LOCAL')) box.insertBefore(div, cursor);
+  else box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  logLineCount++; document.getElementById('log-line-count').textContent = 'LINES: ' + logLineCount;
+}
+
+function defaultLogHtml() {
+  logLineCount = 0;
+  document.getElementById('log-line-count').textContent = 'LINES: 0';
+  return '<div class="text-on-surface-variant">[<span class="text-primary-fixed">*</span>] SCRAPER_OS_V1.0 INITIALIZED</div><div class="text-on-surface-variant">[<span class="text-primary-fixed">*</span>] AWAITING TASK_ASSIGNMENT...</div><div class="flex items-center gap-1 mt-2"><span class="text-primary-fixed">SCRAPER@LOCAL:~$</span><span class="w-2 h-4 bg-primary-fixed cursor-blink"></span></div>';
+}
+
+// ═══ TERMINATE ═══
+function terminateJob() {
+  if (eventSource) { eventSource.close(); eventSource = null; }
+  const t = new Date().toLocaleTimeString('en-GB',{hour12:false});
+  addLog(t, 'KILL', 'TASK_TERMINATED_BY_OPERATOR', 'error');
+  document.getElementById('log-status-label').textContent = 'STATUS: TERMINATED';
+  document.getElementById('traffic-status').textContent = 'DATA_TRAFFIC: STOPPED';
+  document.getElementById('banner-threads').textContent = '0 / 0';
+  if (jobTimerInterval) { clearInterval(jobTimerInterval); jobTimerInterval = null; }
+}
+
+// ═══ RESULTS PAGE ═══
+function populateResultsPage() {
+  const jobId = currentJobId;
+  const data = completedData[jobId];
+  const tbody = document.getElementById('db-tbody');
+  const preview = document.getElementById('preview-box');
+  if (!data || !data.results) {
+    tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-on-surface-variant/50">[ NO_COMPLETED_JOBS ]</td></tr>';
+    preview.innerHTML = '<div class="mb-2 text-outline opacity-50 font-bold">// RAW_TEXT_OUTPUT [WAITING]</div><div class="text-on-surface-variant italic">[ NO_RESULTS_YET ]</div>';
+    document.getElementById('db-total-records').textContent = 'TOTAL_RECORDS: 0';
+    return;
+  }
+  let html = '', totalRecords = 0, idx = 0;
+  const items = Object.entries(data.results);
+  const now = new Date();
+  const ts = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+'T'+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  items.forEach(([url,res]) => {
+    let domain = '';
+    try { domain = new URL(url).hostname; } catch(e) { domain = url; }
+    const ec = (res.emails||[]).length;
+    const pc = (res.phones||[]).length;
+    totalRecords += ec + pc;
+    const bg = idx % 2 === 0 ? '' : ' bg-surface-container-low';
+    const status = (ec>0||pc>0) ? '<span class="bg-on-primary-container text-primary-fixed px-2 border border-primary-fixed">SUCCESS</span>' : '<span class="bg-error-container text-error px-2 border border-error">EMPTY</span>';
+    html += '<tr class="' + bg + ' hover:bg-primary-container hover:text-on-primary-container group cursor-pointer transition-colors"><td class="p-3 text-secondary-fixed-dim group-hover:text-on-primary-container">#' + (jobId||'').substring(0,8) + '</td><td class="p-3">' + escHtml(domain) + '</td><td class="p-3 text-on-surface-variant">' + ts + '</td><td class="p-3 font-bold text-secondary">' + ec.toLocaleString() + '</td><td class="p-3">' + status + '</td></tr>';
+    idx++;
+  });
+  tbody.innerHTML = html;
+  document.getElementById('db-total-records').textContent = 'TOTAL_RECORDS: ' + totalRecords.toLocaleString();
+  let phtml = '<div class="mb-2 text-outline opacity-50 font-bold">// RAW_TEXT_OUTPUT [LAST_30]</div>';
+  let count = 0;
+  for (const [url,res] of items) {
+    for (const em of (res.emails||[])) { if (count>=30) break; phtml += '<div class="mb-1 p-1 hover:bg-secondary/10 cursor-default">' + escHtml(em) + '</div>'; count++; }
+    if (count>=30) break;
+  }
+  if (count===0) phtml += '<div class="text-on-surface-variant italic">[ NO_EXTRACTED_ENTITIES ]</div>';
+  phtml += '<div class="mt-4 flex items-center gap-2"><span class="text-primary-fixed cursor-blink">█</span><span class="text-on-surface-variant italic">END OF BUFFER</span></div>';
+  preview.innerHTML = phtml;
+  document.getElementById('tel-jobs').textContent = sessionJobs;
+  document.getElementById('tel-emails').textContent = sessionEmails.toLocaleString();
+  document.getElementById('tel-phones').textContent = sessionPhones.toLocaleString();
+  document.getElementById('footer-storage').textContent = 'LOCAL_STORAGE: ' + Math.min(Math.round(totalRecords/12500*100),100) + '% FULL';
+  document.getElementById('dl-unique').onclick = () => { window.location.href = '/download/' + jobId + '/unique'; };
+  document.getElementById('dl-summary').onclick = () => { window.location.href = '/download/' + jobId + '/summary'; };
+  document.getElementById('dl-phones').onclick = () => { window.location.href = '/download/' + jobId + '/phones'; };
+  document.getElementById('dl-json').onclick = () => { window.location.href = '/download/' + jobId + '/json'; };
+}
+
+// ═══ RECENT JOBS TABLE ═══
+async function refreshJobs() {
+  try {
+    const res = await fetch('/jobs');
+    const jobs = await res.json();
+    const tbody = document.getElementById('jobs-tbody');
+    if (!jobs.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-on-surface-variant/50">[ NO_JOBS_REGISTERED ]</td></tr>';
+      document.getElementById('jobs-count').textContent = 'SHOWING 0 JOBS';
+      return;
+    }
+    let html = '';
+    jobs.forEach(j => {
+      let statusClass = 'text-on-surface-variant', statusText = 'QUEUED';
+      if (j.status === 'running') { statusClass = 'text-secondary-fixed-dim'; statusText = 'IN_PROGRESS'; }
+      else if (j.status === 'done') { statusClass = 'text-primary-fixed'; statusText = 'COMPLETED'; }
+      html += '<tr class="border-b border-outline hover:bg-surface-variant/50"><td class="p-2 border-r border-outline text-secondary-fixed-dim">#' + j.job_id.substring(0,8) + '</td><td class="p-2 border-r border-outline">' + (j.timestamp||'—') + '</td><td class="p-2 border-r border-outline">' + j.total + ' URLS</td><td class="p-2 border-r border-outline"><span class="' + statusClass + '">[' + statusText + ']</span></td><td class="p-2 text-right"><button class="text-primary hover:underline" onclick="if(j.status===\'done\')switchScreen(\'results\')">[VIEW]</button></td></tr>';
+    });
+    tbody.innerHTML = html;
+    document.getElementById('jobs-count').textContent = 'SHOWING ' + jobs.length + ' JOB' + (jobs.length!==1?'S':'');
+    document.getElementById('sys-threads').textContent = jobs.filter(j=>j.status==='running').length + '/' + jobs.length;
+  } catch(e) {}
+}
+
+// ═══ KEYBOARD SHORTCUTS ═══
+document.addEventListener('keydown', (e) => {
+  const key = e.key.toLowerCase();
+  if (key === 't') { if (confirm('CONFIRM TERMINATION: DATA LOSS MAY OCCUR')) terminateJob(); }
+  if (key === 'b') switchScreen('dashboard');
+});
+
+// ═══ CLOCK ═══
+function updateClock() {
+  const now = new Date();
+  const s = now.toLocaleTimeString('en-GB',{hour12:false});
+  document.getElementById('clock').textContent = s;
+  document.getElementById('sys-clock').textContent = s;
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ═══ UTILITIES ═══
+function escHtml(s) { if (!s) return ''; const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function formatBytes(b) { if (b<1024) return b+' B'; if (b<1048576) return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+let toastTimer;
+function showToast(msg, type) {
+  const t=document.getElementById('toast'); t.textContent=msg;
+  t.className='fixed bottom-6 right-6 z-50 px-4 py-2 border font-mono text-[12px] shadow-2xl '+(type==='error'?'bg-error-container text-error border-error':'bg-surface text-primary border-outline');
+  t.classList.remove('hidden'); clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.add('hidden'),4000);
+}
+
+// ═══ JITTER EFFECT (dashboard progress bars) ═══
+setInterval(() => {
+  const bars = document.querySelectorAll('.font-code-snippet.text-primary-container, .font-code-snippet.text-secondary-fixed-dim');
+  bars.forEach(bar => {
+    if (Math.random() > 0.8) { bar.style.opacity = '0.7'; setTimeout(() => bar.style.opacity = '1', 50); }
+  });
+}, 3000);
+
+// ═══ INIT ═══
+refreshJobs();
+</script>
+</body>
+</html>
