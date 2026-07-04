@@ -6,13 +6,46 @@ import os
 import time
 import threading
 import re
+import socket
+from urllib.parse import urlparse
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from email_scraper import scrape_multiple
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=None)
-CORS(app)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
+
+ALLOWED_ORIGINS = ['https://email-web-scraper.vercel.app']
+CORS(app, origins=ALLOWED_ORIGINS)
+
+MAX_CONCURRENT_JOBS = 5
+MAX_URLS_PER_REQUEST = 500
+PRIVATE_IP_PREFIXES = ('10.', '172.16.', '172.17.', '172.18.', '172.19.',
+                       '172.20.', '172.21.', '172.22.', '172.23.', '172.24.',
+                       '172.25.', '172.26.', '172.27.', '172.28.', '172.29.',
+                       '172.30.', '172.31.', '192.168.', '169.254.')
+BLOCKED_HOSTS = {'localhost', '127.0.0.1', '0.0.0.0', '[::1]', '::1'}
+
+
+def _is_safe_url(url):
+    parsed = urlparse(url)
+    host = parsed.hostname
+    if not host:
+        return False
+    if host.lower() in BLOCKED_HOSTS:
+        return False
+    if host.replace('.', '').isdigit():
+        if host.startswith(PRIVATE_IP_PREFIXES):
+            return False
+    try:
+        for _, _, addrs in socket.getaddrinfo(host, 80):
+            ip = addrs[0][0]
+            if ip.startswith(PRIVATE_IP_PREFIXES) or ip in BLOCKED_HOSTS:
+                return False
+    except Exception:
+        return False
+    return True
 
 jobs = {}
 job_queues = {}
@@ -128,10 +161,22 @@ def start_scrape():
     if not urls:
         return jsonify({'error': 'No URLs found'}), 400
 
+    if len(urls) > MAX_URLS_PER_REQUEST:
+        return jsonify({'error': f'Maximum {MAX_URLS_PER_REQUEST} URLs per request'}), 400
+
+    for url in urls:
+        if not _is_safe_url(url):
+            return jsonify({'error': f'Blocked or unsafe URL: {url}'}), 400
+
     if max_workers is None: max_workers = 5
     if crawl_depth is None: crawl_depth = 0
     max_workers = max(1, min(max_workers, 200))
     crawl_depth = max(0, min(crawl_depth, 3))
+
+    with job_lock:
+        running = sum(1 for j in jobs.values() if j['status'] == 'running')
+        if running >= MAX_CONCURRENT_JOBS:
+            return jsonify({'error': f'Maximum {MAX_CONCURRENT_JOBS} concurrent jobs. Wait for one to finish.'}), 429
 
     job_id = str(uuid.uuid4())
     with job_lock:
@@ -149,6 +194,12 @@ def start_scrape():
             'total_pages_scraped': 0,
         }
         job_queues[job_id] = []
+        done = [(jid, j.get('_completed_at', 0)) for jid, j in jobs.items() if j['status'] == 'done']
+        if len(jobs) > 50:
+            done.sort(key=lambda x: x[1])
+            for old_id, _ in done[:len(jobs) - 50]:
+                del jobs[old_id]
+                job_queues.pop(old_id, None)
 
     thread = threading.Thread(
         target=run_scrape,
@@ -212,6 +263,7 @@ def run_scrape(job_id, urls, max_workers, crawl_depth):
         j['all_emails'] = data['all_emails']
         j['all_phones'] = data['all_phones']
         j['total_pages_scraped'] = data['total_pages_scraped']
+        j['_completed_at'] = time.time()
 
     _push(job_id, {
         'type': 'done',
@@ -254,7 +306,7 @@ def stream(job_id):
         headers={
             'Cache-Control': 'no-cache',
             'X-Accel-Buffering': 'no',
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': ALLOWED_ORIGINS[0],
         },
     )
 
@@ -345,8 +397,9 @@ def download_json(job_id):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
+    debug = 'RENDER' not in os.environ
     print('=' * 60)
     print('  LeadScraper \u2014 Web UI (Enhanced)')
     print(f'  Open: http://0.0.0.0:{port}')
     print('=' * 60)
-    app.run(host='0.0.0.0', port=port, threaded=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=port, threaded=True, use_reloader=False, debug=debug)
