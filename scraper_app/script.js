@@ -16,7 +16,7 @@ let mSuccess = 0;
 let jobStartTime = null;
 let jobTimerInterval = null;
 let logLineCount = 0;
-const API = '';
+const API = 'https://lead-scraper-api-kqr.onrender.com';
 
 // ═══ NAVIGATION ═══
 const SCREEN_TITLES = { dashboard:'[1] DASHBOARD', active:'[2] ACTIVE_JOBS', config:'[3] CONFIG_ENV', results:'[4] SCRAPE_DB' };
