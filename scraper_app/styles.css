@@ -1,0 +1,30 @@
+body { font-family: 'JetBrains Mono', monospace; background: #0c1609; color: #d9e7d0; margin: 0; overflow-x: hidden; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #141e10; }
+::-webkit-scrollbar-thumb { background: #84967c; border: 1px solid #0c1609; }
+::-webkit-scrollbar-thumb:hover { background: #00ff00; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.cursor-blink { animation: blink 1s step-end infinite; }
+.crt-overlay { pointer-events:none; position:fixed; inset:0; background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.1) 50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03)); background-size:100% 3px,3px 100%; z-index:100; opacity:0.2; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.pulse { animation:pulse 1.4s ease-in-out infinite; }
+.screen { display:none; }
+.screen.active { display:flex; flex-direction:column; }
+.grid-bg { background-image:linear-gradient(#182214 1px, transparent 1px),linear-gradient(90deg,#182214 1px,transparent 1px); background-size:20px 20px; }
+.dot-bg { background-image:radial-gradient(circle,#2d3828 1px,transparent 1px); background-size:24px 24px; }
+.ascii-border { position:relative; border:2px solid #84967c; }
+.ascii-header { position:absolute; top:-14px; left:12px; background:#0c1609; padding:0 8px; color:#00ff00; font-weight:800; font-size:20px; line-height:28px; z-index:10; }
+.fade-in { animation:fadeSlide .2s ease-out; }
+@keyframes fadeSlide { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
+.col-card { cursor:pointer; border:1px solid #3b4b35; background:#141e10; transition:all .12s; }
+.col-card:hover, .col-card.selected { border-color:#00ff00 !important; background:rgba(0,255,0,.08) !important; }
+tr.invert-flash { filter:invert(1); }
+.btn-primary { border:2px solid #00ff00; background:#00ff00; color:#027100; font-weight:700; cursor:pointer; transition:all .12s; }
+.btn-primary:hover { background:#77ff61; border-color:#77ff61; }
+.btn-primary:active { filter:invert(1); }
+.btn-primary:disabled { opacity:0.4; cursor:not-allowed; background:#3b4b35; border-color:#3b4b35; color:#84967c; }
+.btn-ghost { border:1px solid #84967c; color:#b9ccaf; font-weight:700; cursor:pointer; transition:all .12s; }
+.btn-ghost:hover { border-color:#eaffde; color:#eaffde; }
+.btn-ghost:active { filter:invert(1); }
+th { position:sticky; top:0; z-index:5; }

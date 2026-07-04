@@ -21,9 +21,20 @@ job_lock = threading.Lock()
 
 @app.route('/')
 def index():
-    path = os.path.join(BASE_DIR, 'index.html')
+    path = os.path.join(BASE_DIR, 'scraper_app', 'index.html')
     with open(path, encoding='utf-8') as f:
         return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    allowed = {'styles.css', 'script.js'}
+    if filename in allowed:
+        path = os.path.join(BASE_DIR, 'scraper_app', filename)
+        if os.path.exists(path):
+            with open(path, encoding='utf-8') as f:
+                return f.read(), 200, {'Content-Type': 'text/css' if filename.endswith('.css') else 'application/javascript'}
+    return 'Not Found', 404
 
 
 @app.route('/preview-csv', methods=['POST'])
