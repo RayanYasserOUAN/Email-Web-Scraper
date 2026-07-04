@@ -21,9 +21,12 @@ job_lock = threading.Lock()
 
 @app.route('/')
 def index():
-    path = os.path.join(BASE_DIR, 'scraper_app', 'index.html')
-    with open(path, encoding='utf-8') as f:
-        return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    for candidate in ['scraper_app/index.html', 'index.html']:
+        path = os.path.join(BASE_DIR, candidate)
+        if os.path.exists(path):
+            with open(path, encoding='utf-8') as f:
+                return f.read(), 200, {'Content-Type': 'text/html; charset=utf-8'}
+    return 'OK', 200
 
 
 @app.route('/<path:filename>')
