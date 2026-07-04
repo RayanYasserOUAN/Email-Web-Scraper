@@ -6,7 +6,6 @@ import os
 import time
 import threading
 import re
-import socket
 from urllib.parse import urlparse
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
@@ -20,7 +19,7 @@ ALLOWED_ORIGINS = ['https://email-web-scraper.vercel.app']
 CORS(app, origins=ALLOWED_ORIGINS)
 
 MAX_CONCURRENT_JOBS = 5
-MAX_URLS_PER_REQUEST = 500
+MAX_URLS_PER_REQUEST = 5000
 PRIVATE_IP_PREFIXES = ('10.', '172.16.', '172.17.', '172.18.', '172.19.',
                        '172.20.', '172.21.', '172.22.', '172.23.', '172.24.',
                        '172.25.', '172.26.', '172.27.', '172.28.', '172.29.',
@@ -38,13 +37,6 @@ def _is_safe_url(url):
     if host.replace('.', '').isdigit():
         if host.startswith(PRIVATE_IP_PREFIXES):
             return False
-    try:
-        for _, _, addrs in socket.getaddrinfo(host, 80):
-            ip = addrs[0][0]
-            if ip.startswith(PRIVATE_IP_PREFIXES) or ip in BLOCKED_HOSTS:
-                return False
-    except Exception:
-        return False
     return True
 
 jobs = {}
