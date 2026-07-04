@@ -1,3 +1,7 @@
 {
-  "builds": [{ "src": "*.html", "use": "@vercel/static" }]
+  "builds": [{ "src": "scraper_app/**", "use": "@vercel/static" }],
+  "routes": [
+    { "src": "/", "dest": "/scraper_app/index.html" },
+    { "src": "/(.*)", "dest": "/scraper_app/$1" }
+  ]
 }
