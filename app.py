@@ -344,8 +344,9 @@ def download_json(job_id):
 
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
     print('=' * 60)
     print('  LeadScraper \u2014 Web UI (Enhanced)')
-    print('  Open: http://localhost:5000')
+    print(f'  Open: http://0.0.0.0:{port}')
     print('=' * 60)
-    app.run(debug=True, threaded=True, port=5000, use_reloader=False)
+    app.run(host='0.0.0.0', port=port, threaded=True, use_reloader=False)
